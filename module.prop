@@ -1,0 +1,7 @@
+id=Thor_advanced_module
+name=Xiaomi 12S Ultra 系统功能补全
+version=v3
+versionCode=3
+author=在其滲透
+description=可选择以下操作：激活 DM 设备映射器，开启 1 : 1 ZRAM、Ultra HDR显示、自动调节色温、节律护眼和锁屏 AOD、开启高级材质 3.0、补全模糊（锁屏字体模糊需要高级材质 3.0），关闭应用预加载。
+minmagisk=26000
