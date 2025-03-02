@@ -135,12 +135,14 @@ rm -rf /data/system/package_cache/*
 [ -s "$MODPATH/system.prop" ] && :> "$MODPATH/system.prop"
 
 # 检查 机型.xml 文件是否存在，若存在则复制到模块内
-xml_file="$MODPATH/system/product/etc/device_features/"
-# 0 表示存在，1 表示不存在
-xml_exist=0
-if [ -f "/system/product/etc/device_features/$device_code.xml" ]; then
+device_code_xml="$device_code".xml
+xml_file="$MODPATH/system/product/etc/device_features/$device_code_xml"
+xml_exist=0 # 0 表示存在，1 表示不存在
+if [ -f "/system/product/etc/device_features/$device_code_xml" ]; then
+    mkdir -p "$MODPATH/system/product/etc/device_features"
     # 复制文件到下载目录（保留原文件名）
-    cp "/system/product/etc/device_features/$device_code.xml" "$xml_file"
+    cp "/system/product/etc/device_features/$device_code_xml" "$xml_file"
+    add_log "完成 机型.xml 文件的复制。"
 else
     ui_print "*********************************************"
     ui_print "- 未找到 机型.xml 文件，不支持开启锁屏 AOD、节律护眼和自动调节色温功能。"
@@ -148,7 +150,6 @@ else
     xml_exist=1
     add_log "未找到 机型.xml 文件。"
 fi
-
 
 ui_print "*********************************************"
 ui_print "- 是否开启 DM 设备映射器"
@@ -216,7 +217,7 @@ if [[ $xml_exist == 0 ]]; then
         add_log "自动调节色温功能代码在 .xml 中已存在"
     else
         sed -i '/<bool name="support_android_flashlight">true<\/bool>/a\
-    <!-- whether support smart eyecare -->
+    <!-- whether support smart eyecare -->\
     <bool name="support_smart_eyecare">true</bool>' "$xml_file"
     fi
         ui_print "- 已开启自动调节色温"
@@ -242,7 +243,7 @@ if [[ $xml_exist == 0 ]]; then
         add_log "节律护眼功能代码在 .xml 中已存在"
     else
         sed -i '/<bool name="support_android_flashlight">true<\/bool>/a\
-    <!-- default rhythmic eyecare mode -->
+    <!-- default rhythmic eyecare mode -->\
     <integer name="default_eyecare_mode">2</integer>' "$xml_file"
     fi
         ui_print "- 已开启节律护眼"
