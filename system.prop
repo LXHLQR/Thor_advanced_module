@@ -32,3 +32,16 @@
 
 # # 应用程序启动时禁用模糊（0 为禁用，1 为启用）
 # ro.launcher.blur.appLaunch=1
+
+# # 相册 APP 可能相关的内容（在 机型.xml 文件中修改才有用）
+# <!--  gallery setting  -->
+# <bool name="gallery_support_media_feature">true</bool>
+# <bool name="gallery_support_video_compress">true</bool>
+# <bool name="gallery_support_analytic_face_and_scene">true</bool>
+# <string name="gallery_cpu_series">8650</string>
+# <bool name="gallery_support_time_burst_video">true</bool>
+# <integer name="gallery_device_series">1</integer>
+# <bool name="support_local_ocr">true</bool>
+# <bool name="support_hdr_enhance">true</bool>
+# <bool name="gallery_support_dolby">true</bool>
+# <bool name="gallery_support_print">true</bool>
