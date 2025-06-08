@@ -22,10 +22,7 @@ log_file="$MODDIR/log.txt"
 if [ ! -f "$log_file" ]; then
     touch "$MODDIR/$log_file"  # 创建新文件
     add_log "未检测到 log.txt 文件，已新建文件。"
-else
-    add_log "检测到 log.txt 文件。"
 fi
-add_log "开始执行 service.sh 文件。"
 
 device_code="$(getprop ro.product.device)"
 device_code_xml="$device_code".xml

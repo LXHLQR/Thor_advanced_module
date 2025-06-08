@@ -104,6 +104,22 @@ add_log() {
   echo "[$timestamp] $content" >> "$log_file"
 }
 
+# 传递描述内容至 log.txt
+add_log() {
+  local log_file="$MODPATH/log.txt"
+  local content="$1"
+  local timestamp
+  # 检查是否传入内容
+  if [ -z "$content" ]; then
+      echo "错误：请传入要记录的内容作为参数"
+      exit 1
+  fi
+
+  # 写入带时间戳的内容
+  timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+  echo "[$timestamp] $content" >> "$log_file"
+}
+
 #音量键操作读取
 volumeKeyListener() {
     local choose

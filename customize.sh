@@ -30,27 +30,88 @@ if [ "$(expr "$device_soc_model" : 'SM\([0-9]\{1,\}\)')" != "" ]; then
   device_soc_number=$(expr "$device_soc_model" : 'SM\([0-9]\{1,\}\)')
 fi
 
-# Magisk 版本检测
-ui_print "- Magisk 版本: $MAGISK_VER_CODE"
-add_log "Magisk 版本: $MAGISK_VER_CODE。"
-if [ "$MAGISK_VER_CODE" -lt 26000 ]; then
+# Magisk / KernelSU 版本检测
+if [[ "$KSU" == "true" ]]; then
+    ui_print "- KernelSU 用户空间版本号: $KSU_VER_CODE"
+    add_log "- KernelSU 用户空间版本号: $KSU_VER_CODE"
+    ui_print "- KernelSU 内核空间版本号: $KSU_KERNEL_VER_CODE"
+    add_log "- KernelSU 内核空间版本号: $KSU_KERNEL_VER_CODE"
+    if ! [ "$KSU_KERNEL_VER_CODE" ] || [ "$KSU_KERNEL_VER_CODE" -lt 10940 ]; then
+        echo ""
+        ui_print "*********************************************"
+        ui_print "- 模块当前可能仅支持 KernelSU 内核空间版本 10940 及以上，建议更新 KernelSU 内核！"
+        ui_print "- 您可以选择继续安装，但可能导致部分模块功能无法正常使用，是否继续？"
+        ui_print "  音量 + ：已了解，继续安装"
+        ui_print "  音量 - ：否"
+        ui_print "*********************************************"
+        add_log "KernelSU 内核空间版本低于要求的 10940。"
+        if [[ $(volumeKeyListener) == 0 ]]; then
+            echo ""
+            ui_print "- 您选择无视 KernelSU 内核低版本警告，可能导致部分模块功能无法正常使用！！！"
+            add_log "无视 MKernelSU 内核低版本警告。"
+        else
+            echo ""
+            add_log "退出安装。"
+            abort "- 请在退出后更新 KernelSU 内核到 10940 及以上！"
+        fi
+    fi
+    if ! [ "$KSU_VER_CODE" ] || [ "$KSU_VER_CODE" -lt 11903 ]; then
     echo ""
-    sleep 1
     ui_print "*********************************************"
-    ui_print "- 模块当前仅支持 Magisk 26.0+ 请更新 Magisk！"
+    ui_print "- 模块当前可能仅支持 KernelSU 软件版本 11903 及以上，建议更新 KernelSU 软件！"
     ui_print "- 您可以选择继续安装，但可能导致部分模块功能无法正常使用，是否继续？"
-    ui_print "  音量+ ：已了解，继续安装"
-    ui_print "  音量- ：否"
+    ui_print "  音量 + ：已了解，继续安装"
+    ui_print "  音量 - ：否"
     ui_print "*********************************************"
-    add_log "Magisk 版本低于要求的 26000。"
+    add_log "KernelSU 用户空间版本低于要求的 11903。"
+        if [[ $(volumeKeyListener) == 0 ]]; then
+            echo ""
+            ui_print "- 您选择无视 KernelSU 软件低版本警告，可能导致部分模块功能无法正常使用！！！"
+            add_log "无视 MKernelSU 软件低版本警告。"
+        else
+            echo ""
+            add_log "退出安装。"
+            abort "- 请在退出后更新 KernelSU 软件到 11903 及以上！"
+        fi
+    fi
+elif  ! [ "$MAGISK_VER_CODE" ]; then
+    ui_print "- Magisk 版本: $MAGISK_VER_CODE"
+    add_log "Magisk 版本: $MAGISK_VER_CODE。"
+    if [ "$MAGISK_VER_CODE" -lt 26000 ]; then
+        echo ""
+        ui_print "*********************************************"
+        ui_print "- 模块当前可能仅支持 Magisk 26.0+，建议更新 Magisk！"
+        ui_print "- 您可以选择继续安装，但可能导致部分模块功能无法正常使用，是否继续？"
+        ui_print "  音量 + ：已了解，继续安装"
+        ui_print "  音量 - ：否"
+        ui_print "*********************************************"
+        add_log "Magisk 版本低于要求的 26000。"
+        if [[ $(volumeKeyListener) == 0 ]]; then
+            echo ""
+            ui_print "- 您选择无视 Magisk 低版本警告，可能导致部分模块功能无法正常使用！！！"
+            add_log "无视 Magisk 低版本警告。"
+        else
+            echo ""
+            add_log "退出安装。"
+            abort "- 请在退出后更新 Magisk 到 26.0+！"
+        fi
+    fi
+else
+    echo ""
+    ui_print "*********************************************"
+    ui_print "- 未检测到 KernelSU / Magisk 类似的 ROOT 管理器！"
+    ui_print "- 您可以选择继续安装，但可能导致部分模块功能无法正常使用，是否继续？"
+    ui_print "  音量 + ：已了解，继续安装"
+    ui_print "  音量 - ：否"
+    ui_print "*********************************************"
+    add_log "未检测到 KernelSU / Magisk 类似的 ROOT 管理器。"
     if [[ $(volumeKeyListener) == 0 ]]; then
         echo ""
-        ui_print "- 你选择无视 Magisk 低版本警告，可能导致部分模块功能无法正常使用！！！"
-        add_log "无视 Magisk 低版本警告。"
+        ui_print "- 您选择无视陌生管理器警告，可能导致部分模块功能无法正常使用！！！"
+        add_log "无视陌生管理器警告。"
     else
         echo ""
         add_log "退出安装。"
-        abort "- 请在退出后更新 Magisk 到 26.0+ ！"
     fi
 fi
 
@@ -70,13 +131,13 @@ if [[ -n $(getprop ro.miui.ui.version.name) ]]; then
             ui_print "*********************************************"
             ui_print "- 该设备型号不是 Xiaomi 12S Ultra，如果继续安装则 1 : 1 Zarm 以及其它一些特性可能不生效。"
             ui_print "- 您可以选择继续安装，但可能导致部分模块功能无法正常使用，是否继续？"
-            ui_print "  音量+ ：已了解，继续安装"
-            ui_print "  音量- ：否"
+            ui_print "  音量 + ：已了解，继续安装"
+            ui_print "  音量 - ：否"
             ui_print "*********************************************"
             add_log "与预设设备不同。"
             if [[ $(volumeKeyListener) == 0 ]]; then
                 echo ""
-                ui_print "- 你选择无视机型型号不同的问题，可能导致部分模块功能无法正常使用！！！"
+                ui_print "- 您选择无视机型型号不同的问题，可能导致部分模块功能无法正常使用！！！"
                 add_log "无视与预设设备不同的问题。"
             else
                 echo ""
@@ -91,13 +152,13 @@ if [[ -n $(getprop ro.miui.ui.version.name) ]]; then
         ui_print "*********************************************"
         ui_print "- 当前设备处于 MIUI 版本，MIUI 版本: $device_version，如果继续安装则大部分模块大概率不起作用。"
         ui_print "- 您可以选择继续安装，但可能导致大部分模块功能无法正常使用，是否继续？"
-        ui_print "  音量+ ：已了解，继续安装"
-        ui_print "  音量- ：否"
+        ui_print "  音量 + ：已了解，继续安装"
+        ui_print "  音量 - ：否"
         ui_print "*********************************************"
         add_log "设备处于 MIUI 版本，系统版本：$device_version。"
         if [[ $(volumeKeyListener) == 0 ]]; then
             echo ""
-            ui_print "- 你选择无视系统版本过低的问题，可能导致大部分模块功能无法正常使用！！！"
+            ui_print "- 您选择无视系统版本过低的问题，可能导致大部分模块功能无法正常使用！！！"
             add_log "无视系统版本过低不同的问题。"
         else
             echo ""
@@ -112,13 +173,13 @@ else
     ui_print "*********************************************"
     ui_print "- 当前设备并非小米 / 红米系手机，系统版本: $device_version，如果继续安装则模块大概率不起作用。"
     ui_print "- 您可以选择继续安装，但可能导致模块功能无法正常使用，是否继续？"
-    ui_print "  音量+ ：已了解，继续安装"
-    ui_print "  音量- ：否"
+    ui_print "  音量 + ：已了解，继续安装"
+    ui_print "  音量 - ：否"
     ui_print "*********************************************"
     add_log "非小米 / 红米系手机，系统版本：$device_version。"
     if [[ $(volumeKeyListener) == 0 ]]; then
         echo ""
-        ui_print "- 你选择无视机型型号不同的问题，可能导致模块功能无法正常使用！！！"
+        ui_print "- 您选择无视机型型号不同的问题，可能导致模块功能无法正常使用！！！"
         add_log "无视手机品牌不同的问题。"
     else
         echo ""
@@ -167,6 +228,9 @@ else
     add_log "未找到 perfinit_bdsize_zram.conf 文件。"
 fi
 
+# 对 module.prop 文件的 description 描述内容进行修改。
+mod_desc="已选择以下修改："
+
 echo ""
 sleep 1
 ui_print "*********************************************"
@@ -179,10 +243,11 @@ if [[ $(volumeKeyListener) == 0 ]]; then
     add_props "persist.miui.extm.dm_opt.enable=true"
     echo ""
     ui_print "- 已开启 DM 设备映射器"
+    mod_desc="${mod_desc}开启 DM 设备映射器、"
     add_log "开启 DM 设备映射器。"
 else
     echo ""
-    ui_print "- 你选择不开启 DM 设备映射器"
+    ui_print "- 您选择不开启 DM 设备映射器"
     add_log "不开启 DM 设备映射器。"
 fi
 
@@ -203,13 +268,13 @@ if [[ $conf_exist == 0 ]]; then
         sed -i "1,/\"product_name\": \[.*\]/ s/\(\"product_name\": \[\)[^]]*\(\]\)/\1\"$device_code\"\2/" "$conf_file"
         echo ""
         ui_print "- 已开启 1 : 1 ram : zram"
+        mod_desc="${mod_desc}开启 1 : 1 ram : zram、"
         add_log "开启 1 : 1 ram : zram。"
     else
         echo ""
-        ui_print "- 你选择不开启 1 : 1 ram : zram"
+        ui_print "- 您选择不开启 1 : 1 ram : zram"
         add_log "不开启 1 : 1 ram : zram。"
     fi
-
 fi
 
 echo ""
@@ -224,10 +289,11 @@ if [[ $(volumeKeyListener) == 0 ]]; then
     add_props "persist.sys.support_ultra_hdr=true"
     echo ""
     ui_print "- 已开启 ULTRA HDR 显示"
+    mod_desc="${mod_desc}开启 ULTRA HDR 显示、"
     add_log "开启 ULTRA HDR 显示。"
 else
     echo ""
-    ui_print "- 你选择不开启 ULTRA HDR 显示"
+    ui_print "- 您选择不开启 ULTRA HDR 显示"
     add_log "不开启 ULTRA HDR 显示。"
 fi
 
@@ -257,20 +323,20 @@ if [[ $xml_exist == 0 ]]; then
         fi
         echo ""
         ui_print "- 已开启相册 APP 超动态显示"
+        mod_desc="${mod_desc}开启相册 APP 超动态显示、"
         add_log "开启相册 APP 超动态显示。"
     else
         echo ""
-        ui_print "- 你选择不开启相册 APP 超动态显示"
+        ui_print "- 您选择不开启相册 APP 超动态显示"
         add_log "不开启相册 APP 超动态显示。"
     fi
-
 fi
 
 if [[ $xml_exist == 0 ]]; then
     echo ""
     sleep 1
     ui_print "*********************************************"
-    ui_print "- 是否相册 APP 的一系列可能相关的内容（从小米 14 Pro 上找的，我也不知道有什么用，大概率也感觉不到有什么变化）"
+    ui_print "- 是否开启相册 APP 的一系列可能相关的内容（从小米 14 Pro 上找的，我也不知道有什么用，大概率也感觉不到有什么变化）"
     ui_print "- 可前往压缩包的 system.prop 文件注释查看该内容"
     ui_print "  音量 + ：是"
     ui_print "  音量 - ：否"
@@ -303,11 +369,12 @@ if [[ $xml_exist == 0 ]]; then
         <bool name=\"gallery_support_dolby\">true</bool>\\
         <bool name=\"gallery_support_print\">true</bool>" "$xml_file"
         echo ""
-        ui_print "- 已开启相册 APP 可能相关的内容"
-        add_log "完成添加相册 APP 可能相关的内容代码并开启相册 APP 可能相关的内容。"
+        ui_print "- 已完成添加相册 APP 可能相关的内容"
+        mod_desc="${mod_desc}添加相册 APP 可能相关的内容代码、"
+        add_log "添加相册 APP 可能相关的内容代码。"
     else
         echo ""
-        ui_print "- 你选择不开启相册 APP 可能相关的内容"
+        ui_print "- 您选择不开启相册 APP 可能相关的内容"
         add_log "不开启相册 APP 可能相关的内容。"
     fi
 fi
@@ -333,13 +400,13 @@ if [[ $xml_exist == 0 ]]; then
         fi
         echo ""
         ui_print "- 已开启自动调节色温"
+        mod_desc="${mod_desc}开启自动调节色温、"
         add_log "开启自动调节色温。"
     else
         echo ""
-        ui_print "- 你选择不开启自动调节色温"
+        ui_print "- 您选择不开启自动调节色温"
         add_log "不开启自动调节色温。"
     fi
-
 fi
 
 if [[ $xml_exist == 0 ]]; then
@@ -363,13 +430,13 @@ if [[ $xml_exist == 0 ]]; then
         fi
         echo ""
         ui_print "- 已开启节律护眼"
+        mod_desc="${mod_desc}开启节律护眼、"
         add_log "开启节律护眼。"
     else
         echo ""
-        ui_print "- 你选择不开启节律护眼"
+        ui_print "- 您选择不开启节律护眼"
         add_log "不开启节律护眼。"
     fi
-
 fi
 
 if [[ $xml_exist == 0 ]]; then
@@ -398,10 +465,11 @@ if [[ $xml_exist == 0 ]]; then
         echo ""
         ui_print "- 已开启锁屏 AOD 显示"
         add_props "# 开启锁屏 AOD 显示"
+        mod_desc="${mod_desc}开启锁屏 AOD 显示、"
         add_log "开启锁屏 AOD 显示。"
     else
         echo ""
-        ui_print "- 你选择不开启锁屏 AOD 显示"
+        ui_print "- 您选择不开启锁屏 AOD 显示"
         add_log "不开启锁屏 AOD 显示。"
     fi
 fi
@@ -425,10 +493,11 @@ if [[ $xml_exist == 0 ]]; then
         <bool name="support_aod_aon">true</bool>' "$xml_file"
         echo ""
         ui_print "- 已开启息屏智能显示（AOD AON）功能"
-        add_log "完成添加息屏智能显示（AOD AON）功能代码并开启息屏智能显示（AOD AON）功能。"
+        mod_desc="${mod_desc}添加息屏智能显示（AOD AON）功能代码、"
+        add_log "添加息屏智能显示（AOD AON）功能代码。"
     else
         echo ""
-        ui_print "- 你选择不开启息屏智能显示（AOD AON）功能"
+        ui_print "- 您选择不开启息屏智能显示（AOD AON）功能"
         add_log "不开启息屏智能显示（AOD AON）功能。"
     fi
 fi
@@ -447,9 +516,9 @@ if [[ $(volumeKeyListener) == 0 ]]; then
     add_props "persist.sys.advanced_visual_release=3"
     echo ""
     ui_print "- 已开启高级材质 3.0"
+    mod_desc="${mod_desc}开启高级材质 3.0、"
     add_log "开启高级材质 3.0。"
 
-    
     echo ""
     sleep 1
     ui_print "*********************************************"
@@ -462,18 +531,18 @@ if [[ $(volumeKeyListener) == 0 ]]; then
         add_props "persist.sys.add_blurnoise_supported=true"
         echo ""
         ui_print "- 已开启锁屏字体模糊"
+        mod_desc="${mod_desc}开启锁屏字体模糊、"
         add_log "开启锁屏字体模糊。"
     else
         echo ""
-        ui_print "- 你选择不开启锁屏字体模糊"
+        ui_print "- 您选择不开启锁屏字体模糊"
         add_log "不开启锁屏字体模糊。"
     fi
 else
     echo ""
-    ui_print "- 你选择不开启高级材质 3.0"
+    ui_print "- 您选择不开启高级材质 3.0"
     add_log "不开启高级材质 3.0。"
 fi
-
 
 echo ""
 sleep 1
@@ -487,8 +556,8 @@ if [[ $(volumeKeyListener) == 0 ]]; then
     add_props "persist.sys.prestart.proc=false"
     echo ""
     ui_print "- 已关闭应用预加载"
+    mod_desc="${mod_desc}关闭应用预加载、"
     add_log "关闭应用预加载。"
-
 
     echo ""
     sleep 1
@@ -505,16 +574,32 @@ if [[ $(volumeKeyListener) == 0 ]]; then
         add_props "persist.sys.app_dexfile_preload.enable=false"
         echo ""
         ui_print "- 已关闭另外 4 项与应用预加载相关的设置"
+        mod_desc="${mod_desc}关闭另外 4 项与应用预加载相关的设置、"
         add_log "关闭另外 4 项与应用预加载相关的设置。"
     else
         echo ""
-        ui_print "- 你选择不关闭另外 4 项与应用预加载相关的设置"
+        ui_print "- 您选择不关闭另外 4 项与应用预加载相关的设置"
         add_log "不关闭另外 4 项与应用预加载相关的设置。"
     fi
 
 else
     echo ""
-    ui_print "- 你选择不关闭应用预加载"
+    ui_print "- 您选择不关闭应用预加载"
     add_log "不关闭应用预加载。"
 
 fi
+
+echo ""
+ui_print "- 完成修改内容选择，开始修改模块描述文本"
+if [ "${mod_desc#"${mod_desc%、}"}" = "、" ]; then
+    mod_desc="${mod_desc%、}。"
+else
+    mod_desc="未发现任何修改内容！"
+fi
+mod_file="$MODPATH/module.prop"
+sed -i "s/^id=.*/id=${device_code}_advanced_module/" "$mod_file"
+sed -i "s/^description=.*/description=$mod_desc/" "$mod_file"
+ui_print "- 完成模块描述文本的修改"
+add_log "完成模块描述文本的修改。"
+ui_print "- 结束模块安装！"
+add_log "结束模块安装。"
