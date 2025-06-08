@@ -597,7 +597,7 @@ else
     mod_desc="未发现任何修改内容！"
 fi
 mod_file="$MODPATH/module.prop"
-sed -i "s/^id=.*/id=${device_code}_advanced_module/" "$mod_file"
+# sed -i "s/^id=.*/id=${device_code}_advanced_module/" "$mod_file"
 sed -i "s/^description=.*/description=$mod_desc/" "$mod_file"
 ui_print "- 完成模块描述文本的修改"
 add_log "完成模块描述文本的修改。"
